@@ -3,96 +3,101 @@ import math
 import matplotlib.pyplot as plt 
 import pandas as pd 
 
-import os
 
-print(os.getcwd())
-
-#df = pd.read_csv(r'7Datasets\pima_indians_diabetes.csv')
 df_t = pd.read_csv('datasets/pima_indians_diabetes.csv')
 
-#df_v = pd.read_csv(r'Datasets\BreastCancerValidation.csv',header=None)
-
-x_t = pd.DataFrame.to_numpy(df_t.iloc[:,:-1])
-y_t = pd.Series.to_numpy(df_t.iloc[:,-1])
+X1 = pd.DataFrame.to_numpy(df_t.iloc[:,:-1])
+y1 = pd.Series.to_numpy(df_t.iloc[:,-1])
 
 
-#x_v = pd.DataFrame.to_numpy(df_v.iloc[:,:-1])
-#y_v = pd.Series.to_numpy(df_v.iloc[:,-1])
-
-
-
-def mu_cov_p(matrix,labels):
-    mu = [] # [num_classes,d]
-    cov = []  # [num_classes, [d,d]]
-    P = []  # [nuk_classes]
-
-    for i,v in enumerate(np.unique(labels)):
-        class_i = matrix[labels == v]
-        mu.append(np.mean(class_i,0))
-        cov.append(np.cov(class_i,rowvar=False))
-        P.append(len(class_i)/len(labels))
-    
-    return mu, cov, P
-    
-
-
-def QDA(x,matrix,labels,mu,cov,P):
-    '''
-    Maximize class for P(class|xi)
+def mu_cov_P_labels(X,y):
+    '''Outputs the mean, covariance and prior class distribution of a dataset
 
     Args:
-        X: The parameter to be classified
-        Matrix [N,d]
-        Labels [N,1]
-        Mean vector [1,d]
-        Covaraince Matrix [d,d] - full/shared/diagonal/singular
-        Prior probabilities of classes [c]
+        X ([n, d]):         input data
+        y ([n, 1]):         labels
 
-
-    Retruns:
-       The mean and covariance and weighting of each labels gaussian
-       The chances of each 
-          
+    Returns:
+        mu ([k,d]):         mean of each class
+        cov ([k,[d,d]]):    covaraince of each class
+        P ([1,k]):          proior probability of the classes 
+        labels ([k])        labels belonging to each class 1..k
     '''
-    class_probability = []
-   
+    mu, cov, P, labels = [], [], [], []
+
+    for i,v in enumerate(np.unique(y)):
+        class_i = X[y == v]
+        mu.append(np.mean(class_i,0))
+        cov.append(np.cov(class_i,rowvar=False))
+        P.append(len(class_i)/len(y))
+        labels.append(v)
+    
+    return mu, cov, P, labels
+    
+
+def qda(x,mu,cov,P,labels=[]):
+    '''Implements Quadratic Discriminant Analysis (QDA) as outlined in Alpaydin
+
+    Args:
+        x ([1,d]):              instance to be classified
+        mu ([k, d]):            mean of each class
+        cov ([k, [d,d]]):       covariance of each class
+        P ([1, k]):             classes' prior probability
+        labels ([k], optinal):  labels belonging to each class 1..k
+
+    Returns: 
+        class (str)            index of the class k with highest probability
+    '''
+    post_prob = []  # Store the probability for each class
+    k = len(mu)     # Number of different classes 
+    
     # For each class
-    for i in range(len(np.unique(labels))):
+    for i in range(k):
+        # As outlined in Alpaydin 5.20 
         inv_cov = np.linalg.inv(cov[i])
         Wi = -0.5*inv_cov
         wi = inv_cov.dot(mu[i].T)
         wi_0 = -0.5 * mu[i].T.dot(inv_cov).dot(mu[i]) \
                -0.5*math.log(np.linalg.det(cov[i])) + math.log(P[i])
         
-        p_x = x.T.dot(Wi).dot(x) + wi.T.dot(x) + wi_0
+        p_x_k = x.T.dot(Wi).dot(x) + wi.T.dot(x) + wi_0 # Probability of x belonging to class k
 
-        class_probability.append(p_x)
+        post_prob.append(p_x_k)
 
-    return np.unique(labels)[class_probability.index(max(class_probability))]
+    index = post_prob.index(max(post_prob))
+
+    if len(labels) == len(mu):
+        return labels[index]
+    return index
 
 
-def accuaracy(matrix,labels,model):
+def accuaracy(X1, y1, X2, y2,):
+    '''Uses X1, y1 to train a Quadratic Discriminant Analysis model.
+    Tests the model on the data X2,y2
+
+    Args:
+        X1 ([n,d]):         training data
+        y1 ([n,1]):         training labels
+        X2 ([m,d]):         test data
+        y2 ([m,1]):         test labels
+
+    Retruns:
+        accuaracy (float):  percentage of correctly classified test data
     '''
-    Applies a model to label all the data
-    
-    Returns:
-        Percentage of data correctly classified
-    '''
+    # Create the QDA-model of the training data
+    mu, cov, P, labels = mu_cov_P_labels(X1,y1) 
+    model = lambda x: qda(x, mu, cov, P, labels)
+    print("Successfully created QDA model")
+
+    # Test the model on the test data
     correct = 0
-    for i in range(len(labels)):
-        if(model(matrix[i], matrix, labels) == labels[i]):
+    for xi,yi in zip(X2,y2):
+        if model(xi) == yi:
             correct += 1 
     
-    return correct/len(labels)
+    return 100 * correct/len(X2)
 
-
-# Create model
-mu,cov,p = mu_cov_p(x_t,y_t)
-model = lambda x,matrix,label : QDA(x, matrix, label, mu, cov, p)
 
 #Test model
-#error_v = accuaracy(x_v,y_v,model)
-error_t = accuaracy(x_t, y_t, model) 
-
-#print('Error validation is {:.2f}'.format(100-error_v*100))
-print('Error train is {:.2f}'.format(100-error_t*100))
+acc = accuaracy(X1, y1, X1, y1)
+print(f'QDA model correctly classified {round(acc,2)}% of the test data.')
