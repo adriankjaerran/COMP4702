@@ -5,8 +5,8 @@ from sklearn import datasets
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 
 ''' 
-Firshers LDA searches for the projection of a dataset which 
-maximizes the Sb/Sw (between class scatter to within class scatter) ratio.
+Firsher's Linear Discriminant Analysis searches for the projection of a dataset 
+which  maximizes the Sb/Sw (between class scatter to within class scatter) ratio.
 
 Doesn't need centalization
 Supervised

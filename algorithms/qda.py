@@ -2,7 +2,7 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt 
 import pandas as pd 
-
+from pca import pca
 
 df_t = pd.read_csv('datasets/pima_indians_diabetes.csv')
 
@@ -99,5 +99,6 @@ def accuaracy(X1, y1, X2, y2,):
 
 
 #Test model
+
 acc = accuaracy(X1, y1, X1, y1)
 print(f'QDA model correctly classified {round(acc,2)}% of the test data.')

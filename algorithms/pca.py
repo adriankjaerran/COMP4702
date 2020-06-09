@@ -6,7 +6,7 @@ from scipy.io import loadmat
 import pandas as pd
 
 ''' 
-The principal component Analysis gives us the directions which holds the most
+The Principal Component Analysis gives us the directions which holds the most
 of the variation in the dataset
 
 Works by finding the eigenvectors of the covariance matrix
@@ -21,6 +21,7 @@ X = df.get('train_X')
 indexes = [i in [1,3,5,7,9] for i in y]
 y = y[indexes]
 X = X[indexes]
+
 
 def pca_plot(X,y=[]):
 	'''Produces a 2D-plot unsing the two first dimensions of the data.
@@ -49,7 +50,6 @@ def pca_plot(X,y=[]):
 	plt.show()
 
 
-
 def pca(X,  dim_kept=2, var_kept=0.8,):
 	"""Principal Component Analysis (PCA) as outlined in Alpaydin.
 
@@ -57,6 +57,7 @@ def pca(X,  dim_kept=2, var_kept=0.8,):
 		X ([n,d]):					input data
 		dim_kept (int):				dimension restriction on output
 		var_kept (float, optinal): 	variance retained restriction on output
+
 	Returns: 
 		out ([n, dim_kept]): 		transformed data
 	"""
@@ -77,6 +78,7 @@ def pca(X,  dim_kept=2, var_kept=0.8,):
 	X = X.dot(eigvec[:,:out_dim])
 		
 	return X 
+
 
 X, y = datasets.load_iris(True)
 X = pca(X,2)
