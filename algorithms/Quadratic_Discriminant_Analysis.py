@@ -8,12 +8,13 @@ import os
 print(os.getcwd())
 
 #df = pd.read_csv(r'7Datasets\pima_indians_diabetes.csv')
-df_t = pd.read_csv('Datasets/pima_indians_diabetes.csv')
+df_t = pd.read_csv('datasets/pima_indians_diabetes.csv')
 
 #df_v = pd.read_csv(r'Datasets\BreastCancerValidation.csv',header=None)
 
 x_t = pd.DataFrame.to_numpy(df_t.iloc[:,:-1])
 y_t = pd.Series.to_numpy(df_t.iloc[:,-1])
+
 
 #x_v = pd.DataFrame.to_numpy(df_v.iloc[:,:-1])
 #y_v = pd.Series.to_numpy(df_v.iloc[:,-1])
