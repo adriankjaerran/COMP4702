@@ -31,7 +31,7 @@ def pca_plot(X,y=[]):
 		y ([n,1], optinal):			labels
 	'''
 	title = "PCA plot "
-	plt.figure(figsize=(10,10))
+	plt.figure(figsize=(5,3))
 
 	if len(y) == len(X):
 		for i,v in enumerate(np.unique(y)):
@@ -63,7 +63,7 @@ def pca(X,  dim_kept=2, var_kept=0.8,):
 	# 1. Nomralize the data
 	mu = np.sum(X,axis = 0)/X.shape[0]
 	std  = np.sqrt(np.sum(np.power(X - mu,2),axis=0) / X.shape[0])
-	X = (X-mu)/(std+0.1)
+	X = (X-mu)/(std+0.01)
 
 	# 2. Get the eigenvalues and eigenvectors of the covariance matrix
 	eigval, eigvec = np.linalg.eig(np.cov(X.T,bias=True,ddof=1))
@@ -78,7 +78,7 @@ def pca(X,  dim_kept=2, var_kept=0.8,):
 		
 	return X 
 
-
+X, y = datasets.load_iris(True)
 X = pca(X,2)
 
 pca_plot(X,y)
